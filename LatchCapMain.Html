@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>securlypass</title>
+  <link rel="icon" id="dynamic-favicon" type="image/png" href="https://pass.securly.com/favicon.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #800080;
+      color: #fff;
+      text-align: center;
+    }
+
+    /* --- Header UI --- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 80%;
+      max-width: 600px;
+      margin: 25px auto;
+      background: linear-gradient(90deg, #7a00b3, #b366ff);
+      border-radius: 15px;
+      padding: 10px 15px;
+      box-shadow: 0 0 20px #b19cd9, 0 0 30px #b19cd9;
+      font-size: 1.3em;
+    }
+
+    .time {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-img {
+      width: 24px;
+      height: 24px;
+      filter: invert(1) brightness(2);
+    }
+
+    .gear {
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .gear:hover {
+      transform: rotate(45deg);
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    /* --- Settings Popup --- */
+    #settingsPanel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #d8baff;
+      color: #000;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px #b19cd9;
+      display: none;
+      width: 300px;
+      text-align: left;
+      z-index: 1000;
+    }
+
+    #settingsPanel input {
+      width: 100%;
+      padding: 5px;
+      margin: 5px 0 10px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    #settingsPanel button {
+      background: #b19cd9;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* --- Other Styles --- */
+    .paragraph {
+      font-size: 0.75em;
+      color: white;
+      margin-top: 2.5px;
+      margin-bottom: 5px;
+    }
+
+    .label {
+      margin-top: 30px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    #searchContainer {
+      margin: 20px auto;
+      width: 90%;
+      max-width: 600px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #urlInput {
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: none;
+      background-color: #ffffff;
+      color: #000;
+      width: 70%;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3);
+      font-size: 1em;
+    }
+
+    #openNewTabButton {
+      background-color: #d8baff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+      font-size: 1em;
+    }
+
+    #openNewTabButton:hover {
+      background-color: #b19cd9;
+    }
+
+    .buttons {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+
+    .circle-btn {
+      border-radius: 17.5px;
+      border: none;
+      background-color: #b19cd9;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 8px #b19cd9, 0 0 12px #b19cd9;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      padding: 8px 15px;
+    }
+
+    .circle-btn:hover {
+      background-color: #a292d4;
+      box-shadow: 0 0 12px #a292d4, 0 0 20px #a292d4;
+    }
+
+    #announcementOverlay {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 15px 30px;
+      border: 2px solid purple;
+      border-radius: 5px;
+      box-shadow: 0 0 20px purple, 0 0 30px purple inset;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      opacity: 0;
+      z-index: 1000;
+      transition: opacity 0.5s ease-out;
+      text-align: center;
+    }
+
+    #announcementOverlay.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="announcementOverlay" onclick="hideOverlay()">Jebulabubu : Hi Guys</div>
+
+  <!-- Header -->
+  <header>
+    <div class="time">
+      <img src="https://cdn-icons-png.flaticon.com/512/109/109613.png" class="icon-img" alt="Clock icon" />
+      <span class="time-text" id="liveTime">00:00</span>
+    </div>
+    <div class="title">Latch 💿</div>
+    <img src="https://raw.githubusercontent.com/provxpeuser/HarlemMyKingV3/refs/heads/main/IMG_7053.png" class="icon-img gear" alt="Settings" onclick="toggleSettings()" />
+  </header>
+
+  <h1 class="paragraph">' Jebunny_LuvsyU2ᥫ᭡ clearly made this</h1>
+  <h1 class="paragraph">Only Adriel , Harlem, Aj, Brady and I can have this</h1>
+
+  <!-- Settings Panel -->
+  <div id="settingsPanel">
+    <h3>Settings</h3>
+    <label>Page Title:</label>
+    <input type="text" id="titleInput" placeholder="Enter new title" />
+    <label>Favicon URL:</label>
+    <input type="text" id="faviconInput" placeholder="Enter favicon URL" />
+    <button onclick="saveSettings()">Save</button>
+  </div>
+
+  <!-- Search -->
+  <div id="searchContainer">
+    <input type="text" id="urlInput" placeholder="Enter a URL or search term" />
+    <button id="openNewTabButton">Open</button>
+  </div>
+
+  <!-- Buttons -->
+  <div class="label">Tools</div>
+  <h1 class="paragraph">Tool's you can use during class</h1>
+  <div class="buttons">
+    <button class="circle-btn" data-url="https://www.desmos.com/testing/virginia/scientific" onclick="openEmbedWebsite(this)">Desmos Calculator</button>
+    <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/apps/securly.html" onclick="openEmbedWebsite(this)">Securly Checker</button>
+    <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/music" onclick="openEmbedWebsite(this)">Argon Music Player</button>
+    <button class="circle-btn" data-url="https://freefy.app" onclick="openEmbedWebsite(this)">FreeFy Music Player</button>
+    <button class="circle-btn" data-url="https://tabchats.lovable.app" onclick="openEmbedWebsite(this)">Tabchats (Messages)</button>
+    <h1 class="paragraph">My Tabchat WP645</h1>
+  </div>
+
+  <div class="label">Games</div>
+  <h1 class="paragraph">Games to waste your time during class</h1>
+  <div class="buttons">
+   <button class="circle-btn" data-url="https://3kh0-assets.silvereen.net/3kh0-assets/ball-dodge" onclick="openEmbedWebsite(this)">Ball Dodge</button>
+   <button class="circle-btn" data-url="https://1v1.lol/" onclick="openEmbedWebsite(this)">1v1.lol</button>
+   <button class="circle-btn" data-url="https://ovo-5yu.pages.dev/versions/1.4.4b/" onclick="openEmbedWebsite(this)">OvO</button>
+   <button class="circle-btn" data-url="https://drivemad3.io/drive-mad" onclick="openEmbedWebsite(this)">Drive Mad</button>
+   <button class="circle-btn" data-url="https://1v1.lol/" onclick="openEmbedWebsite(this)">1v1.Lol</button>
+   <button class="circle-btn" data-url="https://www.2048.org/" onclick="openEmbedWebsite(this)">2048</button>
+   <button class="circle-btn" data-url="https://tannerrogalsky.com/mari0/" onclick="openEmbedWebsite(this)">Portal Mario</button>
+   <button class="circle-btn" data-url="https://mcv18.netlify.app/" onclick="openEmbedWebsite(this)">Eaglercraft</button>
+   <button class="circle-btn" data-url="https://1kh0.github.io/projects/retro-bowl/index.html" onclick="openEmbedWebsite(this)">RetroBowl</button>
+   <button class="circle-btn" data-url="https://sussygamedeveloper.github.io/FNAF2/" onclick="openEmbedWebsite(this)">FNAF 2</button>
+   <button class="circle-btn" data-url="https://deadshot.io/" onclick="openEmbedWebsite(this)">Deadshot</button>
+   <button class="circle-btn" data-url="https://www.hoodamath.com/mobile/games/drift-boss/game.html" onclick="openEmbedWebsite(this)">Drift Boss</button>
+   <button class="circle-btn" data-url="https://szhong.4399.com/4399swf//upload_swf/ftp35/liuxinyu/20210324/jj01/index.html" onclick="openEmbedWebsite(this)">Subway Surfers</button>
+   <button class="circle-btn" data-url="https://pizzaedition.win/assets/allgames/Basketrandom" onclick="openEmbedWebsite(this)">Basketball Random</button>
+   <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/games-frame.html?url=/pages/games/block-blast/index.html" onclick="openEmbedWebsite(this)">Block Blast</button>
+   <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/games-frame.html?url=/pages/games/crazy-cattle-3d/index.html" onclick="openEmbedWebsite(this)">Crazy Cattle 3D</button>
+   <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/games-frame.html?url=/pages/games/sandboxels/index.html" onclick="openEmbedWebsite(this)">Sandboxels</button>
+   <button class="circle-btn" data-url="https://pizzaedition.win/assets/allgames/crossyroadnormal/" onclick="openEmbedWebsite(this)">CrossyRoads</button>
+   <button class="circle-btn" data-url="https://pizzaedition.win/assets/allgames/stackbounce" onclick="openEmbedWebsite(this)">Stack Bounce</button>
+  </div>
+
+  <div class="label">Forbidden Tools</div>
+  <h1 class="paragraph">Beyond This Point its your fault if you get in trouble</h1>
+  <div class="buttons">
+    <button class="circle-btn" data-url="https://formb.pegoku.com" onclick="openEmbedWebsite(this)">View Source Exploit</button>
+    <button class="circle-btn" data-url="https://croxyproxy.com" onclick="openEmbedWebsite(this)">CroxyProxy</button>
+  </div>
+
+  <script>
+    window.onload = function () {
+      const overlay = document.getElementById("announcementOverlay");
+      overlay.classList.add("show");
+      setTimeout(() => (overlay.style.display = "none"), 10000);
+      loadSavedSettings();
+      updateTime();
+      setInterval(updateTime, 1000);
+    };
+
+    function hideOverlay() {
+      document.getElementById("announcementOverlay").style.display = "none";
+    }
+
+    function updateTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      document.getElementById("liveTime").textContent = timeString;
+    }
+
+    function toggleSettings() {
+      const panel = document.getElementById("settingsPanel");
+      panel.style.display = panel.style.display === "block" ? "none" : "block";
+    }
+
+    function saveSettings() {
+      const newTitle = document.getElementById("titleInput").value;
+      const newFavicon = document.getElementById("faviconInput").value;
+
+      if (newTitle) {
+        document.title = newTitle;
+        localStorage.setItem("customTitle", newTitle);
+      }
+      if (newFavicon) {
+        document.getElementById("dynamic-favicon").href = newFavicon;
+        localStorage.setItem("customFavicon", newFavicon);
+      }
+      toggleSettings();
+    }
+
+    function loadSavedSettings() {
+      const savedTitle = localStorage.getItem("customTitle");
+      const savedFavicon = localStorage.getItem("customFavicon");
+
+      if (savedTitle) document.title = savedTitle;
+      if (savedFavicon) document.getElementById("dynamic-favicon").href = savedFavicon;
+    }
+
+    document.getElementById("openNewTabButton").addEventListener("click", performSearch);
+    document.getElementById("urlInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") performSearch();
+    });
+
+    function performSearch() {
+      const input = document.getElementById("urlInput").value.trim();
+      if (input) {
+        const url = input.startsWith("https://")
+          ? input
+          : `https://www.google.com/search?igu=1&q=${encodeURIComponent(input)}`;
+        loadWebsiteInNewTab(url);
+      }
+    }
+
+    function openEmbedWebsite(button) {
+      const url = button.getAttribute("data-url");
+      loadWebsiteInNewTab(url);
+    }
+
+    function loadWebsiteInNewTab(url) {
+      const newWindow = window.open("about:blank", "_blank");
+      newWindow.document.write(`
+        <html><head><title>Dashboard</title>
+        <style>body{margin:0;padding:0;overflow:hidden;}iframe{width:100vw;height:100vh;border:none;}</style>
+        </head><body><iframe src="${url}"></iframe></body></html>`);
+    }
+  </script>
+</body>
+</html>
