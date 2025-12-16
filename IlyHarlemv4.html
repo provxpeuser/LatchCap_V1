@@ -837,6 +837,33 @@ localStorage.removeItem("accessCode");
     return `${min}:${sec.toString().padStart(2, '0')}`;
   }
 
+// TEMP CODE WARNING
+const TEMP_CODES = ["425531", "425265"];
+
+function showTempWarning(code) {
+  if (!TEMP_CODES.includes(code)) return;
+
+  const warning = document.createElement("div");
+  warning.textContent = "⚠️ Warning: You have 2 weeks to use this";
+  warning.style.position = "fixed";
+  warning.style.top = "20px";
+  warning.style.left = "50%";
+  warning.style.transform = "translateX(-50%)";
+  warning.style.padding = "12px 20px";
+  warning.style.background = "#ff3b3b";
+  warning.style.color = "white";
+  warning.style.fontWeight = "bold";
+  warning.style.borderRadius = "8px";
+  warning.style.zIndex = "9999";
+  warning.style.boxShadow = "0 0 15px rgba(0,0,0,0.4)";
+
+  document.body.appendChild(warning);
+
+  setTimeout(() => {
+    warning.remove();
+  }, 3000);
+}
+
   window.onload = () => {
     loadMedia();
   };
@@ -880,7 +907,7 @@ async function sendEmbed(title, color, fields) {
 async function checkAccess() {
   let userCode = localStorage.getItem("accessCode");
   let signedIn = localStorage.getItem("signedIn");
-
+  showTempWarning(userCode);
   // Already signed in
   if (signedIn && userCode && codes[userCode]) {
     const name = codes[userCode];
