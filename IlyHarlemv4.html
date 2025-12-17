@@ -327,6 +327,42 @@
     }
   </style>
 </head>
+
+<!-- Update Log Overlay -->
+<div id="updateLogOverlay" style="
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 900px;
+    background-color: rgba(58, 0, 89, 0.95);
+    color: #fff;
+    border: 2px solid #b19cd9;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 0 20px #b19cd9;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+">
+  <h2 style="text-align:center; margin-bottom: 10px;">Announcements</h2>
+  <div id="updateLogContent"></div>
+  <button id="closeUpdateLog" style="
+      display:none;
+      margin-top: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: #b19cd9;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+  ">Close</button>
+</div>
+
 <body>
   <!-- Existing overlay -->
   <div id="announcementOverlay" onclick="hideOverlay()">Jebulabubu : Ok so this is the beta program</div>
@@ -442,6 +478,56 @@
   </div>
 </body>
 <script>
+
+// Update log entries (most recent first)
+const updates = [
+  { date: "TappinWitTheSwitchy", message: "Hey" },
+  { date: "Jebunny_LuvsyU2ᥫ᭡", message: "I added new songs and if you want me to add some more use this link Below" },
+  { date: "Website Logger", message: "https://forms.gle/B9oSE3ghxwD2eu7W6" },
+
+];
+
+function showUpdateLog() {
+  const overlay = document.getElementById("updateLogOverlay");
+  const logContent = document.getElementById("updateLogContent");
+  const closeBtn = document.getElementById("closeUpdateLog");
+
+  // Get last update the user has seen
+  const lastSeen = localStorage.getItem("lastUpdateSeen") || "";
+
+  // Find the latest update
+  const latestUpdate = updates[0].date;
+
+  // Only show if latest update is new
+  if (latestUpdate !== lastSeen) {
+    // Populate updates
+    logContent.innerHTML = "";
+    updates.forEach(u => {
+      const p = document.createElement("p");
+      p.textContent = `${u.date}: ${u.message}`;
+      p.style.marginBottom = "6px";
+      logContent.appendChild(p);
+    });
+
+    overlay.style.display = "block";
+    setTimeout(() => overlay.style.opacity = 1, 50); // fade in
+
+    closeBtn.style.display = "none"; // hide close button for 5 sec
+    setTimeout(() => {
+      closeBtn.style.display = "block";
+      closeBtn.onclick = () => {
+        overlay.style.opacity = 0;
+        setTimeout(() => overlay.style.display = "none", 800);
+        // Save that user has seen the latest update
+        localStorage.setItem("lastUpdateSeen", latestUpdate);
+      };
+    }, 5000);
+  }
+}
+
+window.addEventListener("load", showUpdateLog);
+
+
   window.onload = function () {
     const overlay = document.getElementById("announcementOverlay");
     overlay.classList.add("show");
