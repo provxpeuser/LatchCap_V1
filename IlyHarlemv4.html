@@ -397,9 +397,10 @@
 
   <!-- Buttons -->
   <div class="label">Tools</div>
-  <h1 class="paragraph">Tool's you can use during class</h1>
+  <h1 class="paragraph">Tool's you can use during class and functions for this website</h1>
   <div class="buttons">
-    <button class="circle-btn" data-url="https://raw.githubusercontent.com/provxpeuser/LatchCap_V1/refs/heads/main/TheLinkBoi" onclick="openEmbedWebsite(this)">Discord</button>
+    <button class="circle-btn" data-url="https://raw.githubusercontent.com/provxpeuser/LatchCap_V1/refs/heads/main/TheLinkBoi" onclick="window.open(this.dataset.url,'_blank')">Discord</button>
+    <button class="circle-btn" data-url="https://forms.gle/B9oSE3ghxwD2eu7W6" onclick="window.open(this.dataset.url,'_blank')">New Music Form</button>
     <button class="circle-btn" data-url="https://www.desmos.com/testing/virginia/scientific" onclick="openEmbedWebsite(this)">Desmos Calculator</button>
     <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/apps/securly.html" onclick="openEmbedWebsite(this)">Securly Checker</button>
     <button class="circle-btn" data-url="https://etld.securly.com.surf.surfnet.ca/pages/music" onclick="openEmbedWebsite(this)">Argon Music Player</button>
@@ -479,7 +480,8 @@
 
 // Update log entries (most recent first)
 const updates = [
-  { date: "' Jebunny_LuvsyU2ᥫ᭡", message: "Added More Music" },
+    { date: ".", message: "" },
+  { date: "' Jebunny_LuvsyU2ᥫ᭡", message: "Added More Music, Fixed the discord function and added a button that you can add your music in and will release in the next big update" },
   { date: "Jebunny_LuvsyU2ᥫ᭡", message: "I added new songs and if you want me to add some more use this link Below" },
   { date: "Website Logger", message: "https://forms.gle/B9oSE3ghxwD2eu7W6" },
 
@@ -550,6 +552,10 @@ window.addEventListener("load", showUpdateLog);
     const panel = document.getElementById("settingsPanel");
     panel.style.display = panel.style.display === "block" ? "none" : "block";
   }
+
+function openNewTab(url) {
+  window.open(url, "_blank");
+}
 
   function saveSettings() {
     const newTitle = document.getElementById("titleInput").value;
