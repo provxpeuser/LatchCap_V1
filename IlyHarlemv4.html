@@ -367,6 +367,28 @@
   <!-- Existing overlay -->
   <div id="announcementOverlay" onclick="hideOverlay()">Jebulabubu : Ok so this is the beta program</div>
 
+<!-- Top-right time + battery with percentage -->
+<div id="topRightStatus" style="
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(128, 0, 128, 0.6); /* translucent purple */
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10000;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+">
+    <img id="batteryIcon" src="https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true" style="width:24px; height:24px;" alt="Battery">
+    <span id="batteryPercentage">--%</span>
+    <span id="liveTime">--:--</span>
+</div>
+
+
   <!-- Header -->
   <header>
     <div class="time">
@@ -379,6 +401,7 @@
   <h1 class="paragraph">' Jebunny_LuvsyU2ᥫ᭡ clearly made this</h1>
   <h1 class="paragraph">Only Adriel Blake Adam and I can have this</h1>
 
+  
   <!-- Settings Panel -->
   <div id="settingsPanel">
     <h3>Settings</h3>
@@ -399,6 +422,7 @@
   <div class="label">Tools</div>
   <h1 class="paragraph">Tool's you can use during class and functions for this website</h1>
   <div class="buttons">
+    <button class="circle-btn" onclick="localStorage.removeItem('accessCode'); location.reload()">Logout</button>
     <button class="circle-btn" data-url="https://raw.githubusercontent.com/provxpeuser/LatchCap_V1/refs/heads/main/TheLinkBoi" onclick="window.open(this.dataset.url,'_blank')">Discord</button>
     <button class="circle-btn" data-url="https://forms.gle/B9oSE3ghxwD2eu7W6" onclick="window.open(this.dataset.url,'_blank')">New Music Form</button>
     <button class="circle-btn" data-url="https://www.desmos.com/testing/virginia/scientific" onclick="openEmbedWebsite(this)">Desmos Calculator</button>
@@ -480,8 +504,8 @@
 
 // Update log entries (most recent first)
 const updates = [
-    { date: ".", message: "" },
-  { date: "' Jebunny_LuvsyU2ᥫ᭡", message: "Added More Music, Fixed the discord function and added a button that you can add your music in and will release in the next big update" },
+    { date: "7:08pm Update", message: "" },
+  { date: "' Jebunny_LuvsyU2ᥫ᭡", message: "Added More Music, Fixed the discord function and added a button that you can add your music in and will release in the next big update Added time and battery checker" },
   { date: "Jebunny_LuvsyU2ᥫ᭡", message: "I added new songs and if you want me to add some more use this link Below" },
   { date: "Website Logger", message: "https://forms.gle/B9oSE3ghxwD2eu7W6" },
 
@@ -598,17 +622,87 @@ function openNewTab(url) {
     loadWebsiteInNewTab(url);
   }
 
-  function LogOut(button) {
-localStorage.removeItem("accessCode");
-  }
+function resetAccess() {
+  localStorage.removeItem("accessCode");
+}
 
-  function loadWebsiteInNewTab(url) {
-    const newWindow = window.open("about:blank", "_blank");
-    newWindow.document.write(`
-      <html><head><title>Dashboard</title>
-      <style>body{margin:0;padding:0;overflow:hidden;}iframe{width:100vw;height:100vh;border:none;}</style>
-      </head><body><iframe src="${url}"></iframe></body></html>`);
-  }
+function loadWebsiteInNewTab(url) {
+  const newWindow = window.open("about:blank", "_blank");
+  newWindow.document.write(`
+    <html>
+      <head>
+        <title>Dashboard</title>
+        <style>
+          body { margin:0; padding:0; overflow:hidden; }
+          iframe { width:100vw; height:100vh; border:none; }
+
+          /* Top-right status style */
+          #topRightStatus {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(128, 0, 128, 0.6);
+            padding: 8px 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10000;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+          }
+          #topRightStatus img { width:24px; height:24px; }
+        </style>
+      </head>
+      <body>
+        <div id="topRightStatus">
+          <img id="batteryIcon" src="https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true" alt="Battery">
+          <span id="batteryPercentage">--%</span>
+          <span id="liveTime">--:--</span>
+        </div>
+        <iframe src="${url}"></iframe>
+
+        <script>
+          // Update time
+          function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('liveTime').textContent = timeString;
+          }
+          setInterval(updateTime, 1000);
+          updateTime();
+
+          // Update battery
+          function updateBattery(battery) {
+            const icon = document.getElementById('batteryIcon');
+            const percent = Math.round(battery.level * 100);
+            document.getElementById('batteryPercentage').textContent = percent + '%';
+
+            if (percent <= 25) {
+              icon.src = "https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true";
+            } else if (percent <= 50) {
+              icon.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design-removebg-preview.png?raw=true";
+            } else {
+              icon.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design__1_-removebg-preview.png?raw=true";
+            }
+          }
+
+          if (navigator.getBattery) {
+            navigator.getBattery().then(battery => {
+              updateBattery(battery);
+              battery.addEventListener('levelchange', () => updateBattery(battery));
+            });
+          } else {
+            document.getElementById('batteryPercentage').textContent = 'N/A';
+            console.log('Battery API not supported.');
+          }
+        </\script>
+      </body>
+    </html>
+  `);
+}
+
 
   // Music Player JavaScript
   const musicData = [
@@ -973,6 +1067,42 @@ localStorage.removeItem("accessCode");
     };
   }
 
+// Update the live time every second
+function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    document.getElementById("liveTime").textContent = timeString;
+}
+setInterval(updateTime, 1000);
+updateTime(); // initial call
+
+// Update battery icon and percentage
+function updateBattery(battery) {
+    const icon = document.getElementById("batteryIcon");
+    const percent = Math.round(battery.level * 100);
+    document.getElementById("batteryPercentage").textContent = percent + "%";
+
+    if (percent <= 25) {
+        icon.src = "https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true";
+    } else if (percent <= 50) {
+        icon.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design-removebg-preview.png?raw=true";
+    } else {
+        icon.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design__1_-removebg-preview.png?raw=true";
+    }
+}
+
+// Use Battery API if supported
+if (navigator.getBattery) {
+    navigator.getBattery().then(battery => {
+        updateBattery(battery);
+        battery.addEventListener('levelchange', () => updateBattery(battery));
+    });
+} else {
+    document.getElementById("batteryPercentage").textContent = "N/A";
+    console.log("Battery API not supported in this browser.");
+}
+
+  
   function togglePlay() {
     const button = document.querySelector('.play-pause button');
     if (isPlaying) {
@@ -1090,7 +1220,7 @@ async function checkAccess() {
   }
 
   // Ask for code if not signed in
-  userCode = prompt("Enter your 5-digit access code:");
+  userCode = prompt("Enter your access code. if you don't remember contact me");
 
   if (!userCode) {
     document.body.innerHTML = "<h1>❌ No code entered</h1>";
