@@ -768,226 +768,198 @@ function resetAccess() {
 function loadWebsiteInNewTab(url) {
   const newWindow = window.open("about:blank", "_blank");
   newWindow.document.write(`
-    <html>
-      <head>
-        <title>Dashboard</title>
-        <style>
-          body { margin:0; padding:0; overflow:hidden; font-family: Arial, sans-serif; }
-          iframe { width:100vw; height:100vh; border:none; }
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <style>
+    body { margin:0; padding:0; overflow:hidden; font-family: 'Inter', Arial, sans-serif; background:#000; }
+    iframe { width:100vw; height:100vh; border:none; }
 
-          /* Top-right status style */
-          #topRightStatus {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(128, 0, 128, 0.6);
-            padding: 8px 12px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 10000;
-            color: white;
-            font-size: 14px;
-          }
-          #topRightStatus img { width:24px; height:24px; }
+    /* CENTERED ROUNDED URL BAR */
+    #urlBar { position: fixed; top:10px; left:50%; transform: translateX(-50%); width:75%; height:50px;
+      display:flex; align-items:center; gap:10px; padding:0 16px; background: rgba(88,28,135,0.75);
+      border-radius:25px; backdrop-filter: blur(10px); z-index:10001; border:2px solid rgba(139,92,246,0.6);
+      box-shadow: 0 6px 18px rgba(139,92,246,0.4);
+    }
+    #urlInput { flex:1; height:36px; background: rgba(0,0,0,0.45); border:1px solid rgba(139,92,246,0.6);
+      color:#fff; padding:0 14px; border-radius:18px; outline:none; font-size:14px;
+    }
+    #goBtn { height:36px; padding:0 18px; background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+      border:none; color:white; border-radius:18px; cursor:pointer; font-weight:600;
+    }
 
-          /* Floating buttons */
-          .floatingButton {
-            position: fixed;
-            bottom: 15px;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            border: none;
-            background: transparent;
-            padding: 0;
-            cursor: pointer;
-            z-index: 10001;
-            transition: opacity 0.4s ease, transform 0.2s ease;
-          }
+    /* Top-right status */
+    #topRightStatus { position:fixed; top:10px; right:10px; background-color: rgba(128,0,128,0.6);
+      padding:8px 12px; border-radius:10px; display:flex; align-items:center; gap:8px; z-index:10000; color:white; font-size:14px;
+    }
+    #topRightStatus img { width:24px; height:24px; }
 
-          .floatingButton img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-            box-shadow: 0 6px 18px rgba(139,92,246,0.6);
-            background: linear-gradient(135deg, #8b5cf6, #5b21b6);
-          }
+    /* Floating buttons */
+    .floatingButton { position:fixed; bottom:15px; width:64px; height:64px; border-radius:50%; border:none; background:transparent; padding:0; cursor:pointer; z-index:10001; transition:opacity 0.4s ease, transform 0.2s ease; }
+    .floatingButton img { width:100%; height:100%; border-radius:50%; object-fit:cover; background: linear-gradient(135deg, #8b5cf6, #5b21b6); box-shadow: 0 6px 18px rgba(139,92,246,0.6); }
+    .floatingButton:hover { transform: scale(1.08); }
 
-          .floatingButton:hover { transform: scale(1.08); }
+    /* Tooltip */
+    .tooltip { position:fixed; background: linear-gradient(135deg, #8b5cf6, #5b21b6); color:#fff; padding:10px 16px; border-radius:12px; font-size:14px; font-weight:600; white-space:nowrap; opacity:0; pointer-events:none; transform: translateY(8px); transition: opacity 0.25s ease, transform 0.25s ease; z-index:10002; }
+    .tooltip.show { opacity:1; transform:translateY(-6px); }
 
-          /* Tooltips */
-          .tooltip {
-            position: fixed;
-            background: linear-gradient(135deg, #8b5cf6, #5b21b6);
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(8px);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            z-index: 10002;
-            box-shadow: 0 6px 16px rgba(139,92,246,0.5);
-          }
+    /* Widgets */
+    .widgetContainer { position:fixed; bottom:90px; left:20px; width:360px; height:500px; border-radius:14px; overflow:hidden; background:#1a0f2a; border:2px solid #8b5cf6; box-shadow:0 10px 30px rgba(139,92,246,0.35); display:none; z-index:10003; }
+    .widgetContainer iframe { width:100%; height:100%; border:none; }
 
-          .tooltip.show { opacity: 1; transform: translateY(-6px); }
+    .idle { opacity:0.25; }
+  </style>
+</head>
 
-          /* Floating embed containers */
-          .widgetContainer {
-            position: fixed;
-            bottom: 90px;
-            left: 20px;
-            width: 360px;
-            height: 500px;
-            border-radius: 14px;
-            overflow: hidden;
-            background: #1a0f2a;
-            border: 2px solid #8b5cf6;
-            box-shadow: 0 10px 30px rgba(139,92,246,0.35);
-            display: none;
-            z-index: 10003;
-            transition: opacity 0.4s ease;
-          }
+<body>
 
-          .widgetContainer iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-          }
+  <!-- URL BAR -->
+  <div id="urlBar">
+    <input id="urlInput" spellcheck="false">
+    <button id="goBtn">Reload</button>
+  </div>
 
-          /* Idle fade */
-          .idle { opacity: 0.25; }
-        </style>
-      </head>
-      <body>
-        <!-- Top-right status -->
-        <div id="topRightStatus">
-          <img id="batteryIcon" src="https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true" alt="Battery">
-          <span id="batteryPercentage">--%</span>
-          <span id="liveTime">--:--</span>
-        </div>
+  <!-- STATUS -->
+  <div id="topRightStatus">
+    <img id="batteryIcon" src="https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true">
+    <span id="batteryPercentage">--%</span>
+    <span id="liveTime">--:--</span>
+  </div>
 
-        <!-- Main iframe -->
-        <iframe src="${url}"></iframe>
+  <!-- MAIN IFRAME -->
+  <iframe id="mainIframe" src="${url}"></iframe>
 
-        <!-- Floating buttons -->
-        <div id="tooltip" class="tooltip">melrah’s intelligence</div>
+  <div id="tooltip" class="tooltip"></div>
 
-        <button id="chatToggleBtn" class="floatingButton" style="left:20px;">
-          <img src="https://github.com/provxpeuser/Assets/blob/main/cute-robot-head-icon-logo-design-illustration-bot-robotic-logo-for-business-design-template-with-futuristic-flat-black-minimalist-style-isolated-on-white-background-vector-removebg-preview.png?raw=true" alt="Melrah AI">
-        </button>
+  <!-- BUTTONS -->
+  <button id="chatToggleBtn" class="floatingButton" style="left:20px;">
+    <img src="https://github.com/provxpeuser/Assets/blob/main/cute-robot-head-icon-logo-design-illustration-bot-robotic-logo-for-business-design-template-with-futuristic-flat-black-minimalist-style-isolated-on-white-background-vector-removebg-preview.png?raw=true">
+  </button>
+  <button id="calcToggleBtn" class="floatingButton" style="left:95px;">
+    <img src="https://github.com/provxpeuser/Assets/blob/main/1000_F_426766720_z7Fnu0iQQ21C4GIRlfocNo15orUT0frq-removebg-preview.png?raw=true">
+  </button>
+  <button id="reloadBtn" class="floatingButton" style="left:170px;">
+    <img src="https://github.com/provxpeuser/Assets/blob/main/Untitled_design-removebg-preview%20(1).png?raw=true">
+  </button>
 
-        <button id="calcToggleBtn" class="floatingButton" style="left:95px;">
-          <img src="https://github.com/provxpeuser/Assets/blob/main/1000_F_426766720_z7Fnu0iQQ21C4GIRlfocNo15orUT0frq-removebg-preview.png?raw=true" alt="Calculator">
-        </button>
+  <!-- WIDGETS -->
+  <div id="chatContainer" class="widgetContainer">
+    <iframe src="https://www.chatbase.co/iFMolGga0VfOJ_rzzjaFG/help"></iframe>
+  </div>
+  <div id="calcContainer" class="widgetContainer">
+    <iframe src="https://www.desmos.com/testing/virginia/scientific"></iframe>
+  </div>
 
-        <!-- Separate embeds -->
-        <div id="chatContainer" class="widgetContainer">
-          <iframe src="https://www.chatbase.co/iFMolGga0VfOJ_rzzjaFG/help"></iframe>
-        </div>
+<script>
+/* BATTERY FIXED */
+function setupBattery() {
+  const batteryPercentageEl = document.getElementById("batteryPercentage");
+  const batteryIconEl = document.getElementById("batteryIcon");
 
-        <div id="calcContainer" class="widgetContainer">
-          <iframe src="https://www.desmos.com/testing/virginia/scientific"></iframe>
-        </div>
+  if (!navigator.getBattery) {
+    batteryPercentageEl.textContent = "N/A";
+    return;
+  }
 
-        <script>
-          // ================= TIME =================
-          function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('liveTime').textContent = timeString;
-          }
-          setInterval(updateTime, 1000);
-          updateTime();
+  navigator.getBattery().then(battery => {
+    function update() {
+      const percent = Math.round(battery.level * 100);
+      batteryPercentageEl.textContent = percent + "%";
 
-          // ================= BATTERY =================
-          function updateBattery(battery) {
-            const icon = document.getElementById('batteryIcon');
-            const percent = Math.round(battery.level * 100);
-            document.getElementById('batteryPercentage').textContent = percent + '%';
+      if (percent <= 25)
+        batteryIconEl.src = "https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true";
+      else if (percent <= 75)
+        batteryIconEl.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design-removebg-preview.png?raw=true";
+      else
+        batteryIconEl.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design__1_-removebg-preview.png?raw=true";
+    }
 
-            if (percent <= 25) {
-              icon.src = "https://github.com/provxpeuser/Assets/blob/main/6f42859d931c931a7b5438216733942d-removebg-preview.png?raw=true";
-            } else if (percent <= 75) {
-              icon.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design-removebg-preview.png?raw=true";
-            } else {
-              icon.src = "https://github.com/provxpeuser/Assets/blob/main/Untitled_design__1_-removebg-preview.png?raw=true";
-            }
-          }
+    update(); // initial update
+    battery.addEventListener("levelchange", update);
+    battery.addEventListener("chargingchange", update);
+  }).catch(err => {
+    batteryPercentageEl.textContent = "N/A";
+    console.warn("Battery API not available:", err);
+  });
+}
 
-          if (navigator.getBattery) {
-            navigator.getBattery().then(battery => {
-              updateBattery(battery);
-              battery.addEventListener('levelchange', () => updateBattery(battery));
-            });
-          } else {
-            document.getElementById('batteryPercentage').textContent = 'N/A';
-            console.log('Battery API not supported.');
-          }
+// Delay to ensure popup content is ready
+setTimeout(setupBattery, 100);
 
-          // ================= FLOATING BUTTONS =================
-          const buttons = [
-            { btn: document.getElementById("chatToggleBtn"), container: document.getElementById("chatContainer"), tooltipText: "melrah’s intelligence" },
-            { btn: document.getElementById("calcToggleBtn"), container: document.getElementById("calcContainer"), tooltipText: "Calculator" }
-          ];
+/* TIME */
+setInterval(() => {
+  document.getElementById("liveTime").textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}, 1000);
 
-          const tooltip = document.getElementById("tooltip");
-          let idleTimer, hoverTimer;
+/* URL BAR LOGIC */
+const mainIframe = document.getElementById("mainIframe");
+const urlInput = document.getElementById("urlInput");
+const goBtn = document.getElementById("goBtn");
+urlInput.value = mainIframe.src;
 
-          function resetIdle() {
-            document.querySelectorAll('.floatingButton').forEach(b => b.classList.remove('idle'));
-            document.querySelectorAll('.widgetContainer').forEach(c => c.classList.remove('idle'));
-            clearTimeout(idleTimer);
-            idleTimer = setTimeout(() => {
-              document.querySelectorAll('.floatingButton').forEach(b => b.classList.add('idle'));
-              document.querySelectorAll('.widgetContainer').forEach(c => c.classList.add('idle'));
-            }, 5000);
-          }
+function navigate(u) {
+  if (!u.startsWith("http")) u = "https://" + u;
+  mainIframe.src = u;
+  urlInput.value = u;
+}
 
-          buttons.forEach(obj => {
-            const { btn, container, tooltipText } = obj;
+goBtn.onclick = () => navigate(urlInput.value);
+urlInput.onkeydown = e => e.key === "Enter" && navigate(urlInput.value);
 
-            // Toggle separate embed
-            btn.addEventListener("click", () => {
-              container.style.display = container.style.display === "block" ? "none" : "block";
-              resetIdle();
-            });
+/* BUTTON LOGIC */
+const buttons = [
+  {btn: document.getElementById("chatToggleBtn"), container: document.getElementById("chatContainer"), text:"melrah’s intelligence"},
+  {btn: document.getElementById("calcToggleBtn"), container: document.getElementById("calcContainer"), text:"Calculator"},
+  {btn: document.getElementById("reloadBtn"), container:null, text:"Reload"}
+];
 
-            // Tooltip hover
-            btn.addEventListener("mouseenter", () => {
-              hoverTimer = setTimeout(() => {
-                tooltip.textContent = tooltipText;
-                tooltip.classList.add("show");
-                const rect = btn.getBoundingClientRect();
-                tooltip.style.left = rect.left + "px";
-                tooltip.style.bottom = (window.innerHeight - rect.top + 10) + "px";
-              }, 1000);
-              resetIdle();
-            });
+const tooltip = document.getElementById("tooltip");
+let idleTimer, hoverTimer;
 
-            btn.addEventListener("mouseleave", () => {
-              clearTimeout(hoverTimer);
-              tooltip.classList.remove("show");
-            });
+function resetIdle() {
+  document.querySelectorAll('.floatingButton,.widgetContainer').forEach(e => e.classList.remove('idle'));
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    document.querySelectorAll('.floatingButton,.widgetContainer').forEach(e => e.classList.add('idle'));
+  }, 5000);
+}
 
-            [btn, container].forEach(el => {
-              el.addEventListener("mouseenter", resetIdle);
-              el.addEventListener("mousemove", resetIdle);
-            });
-          });
+buttons.forEach(({btn,container,text})=>{
+  btn.onclick = ()=>{
+    if(container) container.style.display = container.style.display==="block"?"none":"block";
+    else {
+      mainIframe.src = mainIframe.src;
+      document.querySelectorAll(".widgetContainer iframe").forEach(f=>f.src=f.src);
+    }
+    resetIdle();
+  };
 
-          resetIdle();
-        </\script>
-      </body>
-    </html>
+  btn.onmouseenter = ()=>{
+    hoverTimer = setTimeout(()=>{
+      tooltip.textContent = text;
+      tooltip.classList.add("show");
+      const r = btn.getBoundingClientRect();
+      tooltip.style.left = r.left + "px";
+      tooltip.style.bottom = (innerHeight - r.top + 10) + "px";
+    },1000);
+    resetIdle();
+  };
+
+  btn.onmouseleave = ()=>{
+    clearTimeout(hoverTimer);
+    tooltip.classList.remove("show");
+  };
+});
+
+resetIdle();
+</\script>
+
+</body>
+</html>
   `);
 }
+
 
 
 
